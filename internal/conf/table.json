@@ -1,0 +1,29 @@
+[
+  {
+    "TableName": "msg_send",
+    "Indexes": [
+      [
+        {
+          "msg_id": 1
+        },
+        {
+          "from": 1
+        },
+        {
+          "to": 1
+        }
+      ]
+    ]
+  },
+  {
+    "TableName": "d_user",
+    "UniqueIndexes": [
+      {
+        "address": 1
+      },
+      {
+        "nickname": "text"
+      }
+    ]
+  }
+]
