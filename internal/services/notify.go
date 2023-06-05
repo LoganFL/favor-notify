@@ -5,6 +5,7 @@ import (
 	"favor-notify/internal/model"
 	"favor-notify/pkg/errcode"
 	"github.com/gogf/gf/util/gconv"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 )
@@ -65,6 +66,7 @@ func PushNotify(req ReqPushNotify) *errcode.Error {
 
 	_, err = notifyFirebase.Send(context.TODO(), user.Token, req.Title, req.Content, data)
 	if err != nil {
+		logrus.Errorf("firebase errs: %v", err)
 		return errcode.FirebaseSendFailed
 	}
 	if req.IsSave {
@@ -119,6 +121,7 @@ func PushNotifyDao(req ReqPushNotify) *errcode.Error {
 	for _, user := range users {
 		_, err = notifyFirebase.Send(context.TODO(), user.Token, req.Title, req.Content, data)
 		if err != nil {
+			logrus.Errorf("firebase errs: %v", err)
 			return errcode.FirebaseSendFailed
 		}
 		if req.IsSave {
@@ -145,6 +148,7 @@ func PushNotifySys(req ReqPushNotifySys) *errcode.Error {
 	data["networkId"] = gconv.String(req.NetworkId)
 	_, err = notifyFirebase.SendTopic(context.TODO(), req.From, req.Title, req.Content, data)
 	if err != nil {
+		logrus.Errorf("firebase errs: %v", err)
 		return errcode.FirebaseSendFailed
 	}
 	if req.IsSave {
