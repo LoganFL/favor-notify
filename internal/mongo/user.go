@@ -31,5 +31,5 @@ func (u userManageService) GetUserById(id primitive.ObjectID) (*model.User, erro
 
 func (u userManageService) GetUsersByDaoId(daoId primitive.ObjectID) ([]*model.User, error) {
 	user := &model.User{}
-	return user.List(u.db, nil, daoId)
+	return user.List(u.db, daoId)
 }

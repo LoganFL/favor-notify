@@ -48,28 +48,14 @@ func (m *User) Get(ctx context.Context, db *mongo.Database) (*User, error) {
 	return &user, nil
 }
 
-func (m *User) List(db *mongo.Database, conditions *ConditionsT, daoId primitive.ObjectID) ([]*User, error) {
+func (m *User) List(db *mongo.Database, daoId primitive.ObjectID) ([]*User, error) {
 	var (
 		users  []*User
 		err    error
 		cursor *mongo.Cursor
 		query  bson.M
 	)
-	if len(*conditions) == 0 {
-		if query != nil {
-			query = findQuery([]bson.M{query})
-		} else {
-			query = bson.M{"is_del": 0}
-		}
-	}
-	query = findQuery([]bson.M{query, {"token": bson.M{"$en": ""}}, {"dao.dao_id": daoId}})
-	for _, v := range *conditions {
-		if query != nil {
-			query = findQuery([]bson.M{query, v})
-		} else {
-			query = findQuery([]bson.M{v})
-		}
-	}
+	query = findQuery([]bson.M{{"token": bson.M{"$ne": ""}}, {"token": bson.M{"$ne": nil}}, {"dao.dao_id": daoId}})
 
 	pipeline := mongo.Pipeline{
 		{{"$lookup", bson.M{
@@ -78,8 +64,8 @@ func (m *User) List(db *mongo.Database, conditions *ConditionsT, daoId primitive
 			"foreignField": "address",
 			"as":           "dao",
 		}}},
-		{{"$match", query}},
 		{{"$unwind", "$dao"}},
+		{{"$match", query}},
 	}
 	ctx := context.TODO()
 	cursor, err = db.Collection(m.Table()).Aggregate(ctx, pipeline)
