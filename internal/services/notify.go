@@ -4,6 +4,7 @@ import (
 	"context"
 	"favor-notify/internal/model"
 	"favor-notify/pkg/errcode"
+	"fmt"
 	"github.com/gogf/gf/util/gconv"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -66,6 +67,7 @@ func PushNotify(req ReqPushNotify) *errcode.Error {
 
 	_, err = notifyFirebase.Send(context.TODO(), user.Token, req.Title, req.Content, data)
 	if err != nil {
+		fmt.Println(err)
 		logrus.Errorf("firebase errs: %v", err)
 		return errcode.FirebaseSendFailed
 	}
