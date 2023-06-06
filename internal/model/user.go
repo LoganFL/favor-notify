@@ -31,7 +31,7 @@ func (m *User) Get(ctx context.Context, db *mongo.Database) (*User, error) {
 		res  *mongo.SingleResult
 	)
 	if !m.ID.IsZero() {
-		filter := bson.D{{"_id", m.ID}, {"is_del", 0}, {"token", bson.M{"$ne": bson.TypeNull}}}
+		filter := bson.D{{"_id", m.ID}, {"is_del", 0}}
 		res = db.Collection(m.Table()).FindOne(ctx, filter)
 	} else if m.Address != "" {
 		filter := bson.D{{"address", m.Address}, {"is_del", 0}}
@@ -55,7 +55,7 @@ func (m *User) List(db *mongo.Database, daoId primitive.ObjectID) ([]*User, erro
 		cursor *mongo.Cursor
 		query  bson.M
 	)
-	query = findQuery([]bson.M{{"token": bson.M{"$ne": ""}}, {"token": bson.M{"$ne": nil}}, {"dao.dao_id": daoId}})
+	query = findQuery([]bson.M{{"dao.dao_id": daoId}})
 
 	pipeline := mongo.Pipeline{
 		{{"$lookup", bson.M{

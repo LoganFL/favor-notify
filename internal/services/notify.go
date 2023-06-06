@@ -4,9 +4,7 @@ import (
 	"context"
 	"favor-notify/internal/model"
 	"favor-notify/pkg/errcode"
-	"fmt"
 	"github.com/gogf/gf/util/gconv"
-	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"time"
 )
@@ -65,11 +63,11 @@ func PushNotify(req ReqPushNotify) *errcode.Error {
 	data["region"] = req.Region
 	data["networkId"] = gconv.String(req.NetworkId)
 
-	_, err = notifyFirebase.Send(context.TODO(), user.Token, req.Title, req.Content, data)
-	if err != nil {
-		fmt.Println(err)
-		logrus.Errorf("firebase errs: %v", err)
-		return errcode.FirebaseSendFailed
+	if user.Token != "" {
+		_, err = notifyFirebase.Send(context.TODO(), user.Token, req.Title, req.Content, data)
+		if err != nil {
+			return errcode.FirebaseSendFailed
+		}
 	}
 	if req.IsSave {
 		msgId, errs := saveMsg(req)
@@ -121,10 +119,11 @@ func PushNotifyDao(req ReqPushNotify) *errcode.Error {
 	data["region"] = req.Region
 	data["networkId"] = gconv.String(req.NetworkId)
 	for _, user := range users {
-		_, err = notifyFirebase.Send(context.TODO(), user.Token, req.Title, req.Content, data)
-		if err != nil {
-			logrus.Errorf("firebase errs: %v", err)
-			return errcode.FirebaseSendFailed
+		if user.Token != "" {
+			_, err = notifyFirebase.Send(context.TODO(), user.Token, req.Title, req.Content, data)
+			if err != nil {
+				return errcode.FirebaseSendFailed
+			}
 		}
 		if req.IsSave {
 			errs := saveMsgSend(msgId, from, user.ID, req.FromType)
@@ -149,10 +148,9 @@ func PushNotifySys(req ReqPushNotifySys) *errcode.Error {
 	data["region"] = req.Region
 	data["networkId"] = gconv.String(req.NetworkId)
 	_, err = notifyFirebase.SendTopic(context.TODO(), req.From, req.Title, req.Content, data)
-	if err != nil {
-		logrus.Errorf("firebase errs: %v", err)
-		return errcode.FirebaseSendFailed
-	}
+	//if err != nil {
+	//	return errcode.FirebaseSendFailed
+	//}
 	if req.IsSave {
 		sys := &model.MsgSys{
 			From:      from,
